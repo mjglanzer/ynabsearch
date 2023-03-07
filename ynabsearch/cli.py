@@ -24,14 +24,13 @@ def load(budget_name, host):
         client=es, 
         actions=[
             {
-                '_id': transaction.get('id'),
+                '_id': transaction.id,
                 '_index': 'ynab_transactions',
-                '_source': transaction
+                '_source': transaction.to_dict()
             }
             for transaction in ynab.get_transactions()
         ]
     )
-    print(result)
 
     click.echo(f'{result[0]} New transactions loaded successfully.')
 

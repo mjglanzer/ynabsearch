@@ -3,6 +3,8 @@ import requests
 from requests.exceptions import RequestException
 import typing as t
 
+from ynabsearch.model import Transaction
+
 
 YNAB_API_URL = 'https://api.youneedabudget.com/v1/budgets'
 YnabId = t.NewType('YnabId', str)
@@ -52,7 +54,7 @@ class YNABClient:
         res = self._query(f'/{self.budget_id}/transactions')
         return res.get('data').get('transactions')
     
-    def get_transactions(self) -> t.Generator[t.Dict[str, t.Any], None, None]:
+    def get_transactions(self) -> t.Generator[Transaction, None, None]:
         """ Preprocess YNAB subtransactions for Elasticsearch. """
 
         for t in self._get_transactions():
@@ -60,9 +62,10 @@ class YNABClient:
                 for subt in t.get('subtransactions'):
                     subt['date'] = t.get('date')
                     subt['payee_name'] = t.get('payee_name')
-                    
-                    yield subt
+
+                    yield Transaction.from_dict(subt)
             else:
-                yield t
+                
+                yield Transaction.from_dict(t)
 
 
