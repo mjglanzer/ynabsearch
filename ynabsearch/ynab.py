@@ -1,13 +1,16 @@
 import os
+import datetime
 import requests
 from requests.exceptions import RequestException
 import typing as t
 
 from ynabsearch.model import Transaction
 
-
-YNAB_API_URL = 'https://api.youneedabudget.com/v1/budgets'
 YnabId = t.NewType('YnabId', str)
+
+today = datetime.date.today()
+START_OF_CURRENT_YEAR = datetime.date(today.year, 1, 1).strftime('%Y-%m-%d')
+YNAB_API_URL = 'https://api.youneedabudget.com/v1/budgets'
 
 
 class BudgetNotFoundException(Exception):
@@ -31,7 +34,10 @@ class YNABClient:
         raise BudgetNotFoundException(budget_name)
 
     @staticmethod
-    def _query(endpoint: str = '') -> t.Dict[str, t.Any]:
+    def _query(
+        endpoint: str = '', 
+        since_date: str = START_OF_CURRENT_YEAR
+    ) -> t.Dict[str, t.Any]:
         """Authenticated YNAB API request."""
 
         try:
@@ -40,7 +46,8 @@ class YNABClient:
                 headers={
                     'Content-Type': 'application/json',
                     'Authorization': f'Bearer {os.environ.get("YNAB_API_KEY")}'
-                }
+                },
+                params={'since_date': since_date}
             )
             res.raise_for_status()
             return res.json()
@@ -65,7 +72,6 @@ class YNABClient:
 
                     yield Transaction.from_dict(subt)
             else:
-                
                 yield Transaction.from_dict(t)
 
 

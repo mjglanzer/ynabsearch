@@ -16,6 +16,7 @@ class Transaction:
 
     @classmethod
     def from_dict(cls, data: t.Dict[str, t.Any]):
+
         amount = data.get('amount')/1000
 
         return cls(

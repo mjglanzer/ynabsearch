@@ -44,9 +44,9 @@ def test_from_budget_name_failure():
 
 def test_get_transactions():
     with requests_mock.Mocker() as m:
-        res_json = {'data': {'transactions': [{'id': '1', 'subtransactions': []}]}}
+        res_json = {'data': {'transactions': [{'id': '1', 'amount': 50000, 'subtransactions': []}]}}
         m.get(YNAB_API_URL + '/123/transactions', json=res_json)
         client = YNABClient('123')
         transactions = list(client.get_transactions())
         assert len(transactions) == 1
-        assert transactions[0]['id'] == '1'
+        assert transactions[0].id == '1'
